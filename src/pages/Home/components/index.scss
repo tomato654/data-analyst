@@ -1,0 +1,130 @@
+// login.js
+.ant-btn-text{
+    color: #0958d9 !important;
+}
+
+.ant-btn-text:hover{
+    background-color: rgba($color: #fff, $alpha: 0) !important;
+}
+
+// model selection.js
+.container-item{
+    display: grid;
+    grid-template-columns: 25px 120px 1fr ;
+    grid-template-areas: 'a b c';
+    grid-template-rows: 32px;
+    margin-bottom: 20px;
+    .label{
+        justify-self: end;
+        align-self: center;
+        margin-right: 10px;
+    }
+    .ant-form-item{
+        margin: 0;
+    }
+}
+
+.container-radio{
+    position: absolute;
+    .ant-radio-group{
+        display: inline-grid;
+        grid-template-columns: 20px;
+        grid-gap: 20px;
+        grid-auto-rows: 32px;
+    }
+}
+
+// -------------- Message.js ------------
+.message-box{
+
+    display: grid;
+    justify-content: center;
+    justify-items: center;
+    gap: 20px;
+    // grid-template-columns: 820px;
+    .message-box-user {
+        justify-self: end;
+        font-size: 16px;
+        line-height: 22px;
+        max-width: 780px;
+        min-width: 150px;
+        min-height: 60px;
+        padding: 10px 15px 15px 20px;
+        border-radius: 12px 0px 0px 12px;
+        border: 0.5px solid black;
+        margin-left: 40px;
+    }
+    
+    .message-box-ai {
+        justify-self: start;
+        font-size: 16px;
+        line-height: 22px;
+        max-width: 780px;
+        min-width: 150px;
+        min-height: 60px;
+        padding: 10px 15px 15px 20px;
+        border: 0.5px solid black;
+        margin-right: 40px;
+        border-radius: 0px 12px 10px 2px;
+    }
+
+}
+
+.message-box-role{
+    font-size: 18px;
+    font-weight: 600;
+    position: relative;
+    margin-bottom: 20px;
+
+    &::after{
+        position: absolute;
+        content: '';
+        height: 1px;
+        border-left: 100px solid black;
+        top: 30px;
+        left: 0px;
+    }
+}
+
+
+// ----------------Tabs.js------------------------
+
+.sider-tablist{
+    .anticon-delete:hover{
+        color: rgb(255, 77, 79);
+    }
+    div[role='tablist'] {
+        .ant-tabs-nav-list {
+            // 这是修改每个tab标签的
+            .ant-tabs-tab {
+                display: block;
+                margin: 0px 0px 0px 10px !important;
+                background-color: #fff;
+                width: 180px;
+                border: none;
+                border-radius: 8px;
+                position: relative;
+                //  隐藏tab标签后的关闭按钮
+                .ant-tabs-tab-remove{
+                    display: none;
+                }
+            }
+            .ant-tabs-tab-active{
+                transition: all 1s;
+                margin-left: 15px !important;
+                border-radius: 8px 0 0 8px !important;
+                border-top: 1px solid black !important;
+                border-bottom: 1px solid black !important;
+                border-left: 1px solid black !important;
+                width: 185px !important;
+            }
+            .ant-tabs-tab-btn{
+                color: black !important;
+            }
+        }
+    }
+    .ant-tabs-content-holder {
+        display: none;
+    }
+}
+

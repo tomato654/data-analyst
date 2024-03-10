@@ -1,0 +1,27 @@
+
+
+.rc-virtual-list-holder{
+    max-height: none !important;
+    height: auto !important;
+}
+
+.ant-select-dropdown{
+    // width: 150px !important;
+}
+
+.setting-form{
+    .ant-form-item{
+        margin-bottom: 10px;
+    }
+}
+
+.setting-form-item-assistant-id{
+    .ant-form-item-control{
+        .ant-form-item-control-input-content{
+            display: grid;
+            grid-template-columns: auto auto auto;
+        }
+    }
+}
+
+

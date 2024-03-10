@@ -1,0 +1,328 @@
+[
+    {
+        "label": "OpenAI",
+        "value": "OpenAI",
+        "settings": {
+            "API Key": "a string",
+            "Expiration": 120,
+            "Temperature": 1.00,
+            "Top P": 1.00,
+            "Frequency Penalty": 0.00,
+            "Presence Penalty": 0.00,
+            "Prompt Prefix": "none"
+        },
+        "models": [
+            {
+                "label": "GPT-4 Turbo",
+                "value": "gpt-4-turbo",
+                "children":[
+                    {
+                        "label": "gpt-4-0125-preview",
+                        "value": "gpt-4-0125-preview",
+                        "price": {"input": 10, "output": 30}
+                    },
+                    {
+                        "label": "gpt-4-1106-preview",
+                        "value": "gpt-4-1106-preview",
+                        "price": {"input": 10, "output": 30}
+                    },
+                    {
+                        "label": "gpt-4-1106-vision-preview",
+                        "value": "gpt-4-1106-vision-preview",
+                        "price": {"input": 10, "output": 30}
+                    }
+                ]
+            },
+            {
+                "label": "GPT-4",
+                "value": "gpt-4",
+                "children":[
+                    {
+                        "label": "gpt-4",
+                        "value": "gpt-4",
+                        "price": {"input": 30, "output": 60}
+                    },
+                    {
+                        "label": "gpt-4-32k",
+                        "value": "gpt-4-32k",
+                        "price": {"input": 60, "output": 120}
+                    }
+                ]
+            },
+            {
+                "label": "GPT-3.5 Turbo",
+                "value": "gpt-3.5-turbo",
+                "children":[
+                    {
+                        "label": "gpt-3.5-turbo-0125",
+                        "value": "gpt-3.5-turbo-0125",
+                        "price": {"input": 0.5, "output": 1.5}
+                    },
+                    {
+                        "label": "gpt-3.5-turbo-instruct",
+                        "value": "gpt-3.5-turbo-instruct",
+                        "price": {"input": 1.5, "output": 2}
+                    }
+                ]
+            },
+            {
+                "label": "Assistants API",
+                "value": "assistants-api",
+                "children":[
+                    {
+                        "label": "Code interpreter",
+                        "value": "code-interpreter",
+                        "price": {"session": 0.03}
+                    },
+                    {
+                        "label": "Retrieval",
+                        "value": "retrieval",
+                        "price": {"GB/assistant/day": 0.2}
+                    }
+                ]
+            },
+            {
+                "label": "Fine-tuning models",
+                "value": "fine-tuning-models",
+                "children":[
+                    {
+                        "label": "gpt-3.5-turbo",
+                        "value": "gpt-3.5-turbo",
+                        "price": {"training":8,"input": 10, "output": 30}
+                    },
+                    {
+                        "label": "davinci-002",
+                        "value": "davinci-002",
+                        "price": {"training":8,"input": 10, "output": 30}
+                    },
+                    {
+                        "label": "babbage-002",
+                        "value": "babbage-002",
+                        "price": {"training":8,"input": 10, "output": 30}
+                    }
+                ]
+            },
+            {
+                "label": "Embedding models",
+                "value": "embedding-models",
+                "children":[
+                    {
+                        "label": "text-embedding-3-small",
+                        "value": "text-embedding-3-small",
+                        "price": {"usage": 0.02}
+                    },
+                    {
+                        "label": "text-embedding-3-large",
+                        "value": "text-embedding-3-large",
+                        "price": {"usage":0.13}
+                    },
+                    {
+                        "label": "ada-v2",
+                        "value": "Ada-v2",
+                        "price": {"usage": 0.1}
+                    }
+                ]
+            },
+            
+            {
+                "children":[
+                    {
+                        "label": "Davinci-002",
+                        "value": "davinci-002",
+                        "price": {"usage": 2}
+                    },
+                    {
+                        "label": "Babbage-002",
+                        "value": "babbage-002",
+                        "price": {"usage":0.4}
+                    }
+                ]
+            },
+            {
+                "label": "Image models",
+                "value": "image-models",
+                "children":[
+                    {
+                        "label": "DALL·E 3 Standard",
+                        "value": "dalle-3-standard",
+                        "resolution": "1024×1024",
+                        "price": {"image": 0.04}
+                    },
+                    {
+                        "label": "DALL·E 3 Standard",
+                        "value": "dalle-3-standard",
+                        "resolution": "1024×1792, 1792×1024",
+                        "price": {"image": 0.08}
+                    },
+                    {
+                        "label": "DALL·E 3 HD",
+                        "value": "dalle-3-hd",
+                        "resolution": "1024×1024",
+                        "price": {"image": 0.08}
+                    },
+                    {
+                        "label": "DALL·E 3 HD",
+                        "value": "dalle-3-hd",
+                        "resolution": "1024×1792,1792×1024",
+                        "price": {"image": 0.12}
+                    },
+                    {
+                        "label": "DALL·E 2",
+                        "value": "dalle-2",
+                        "resolution": "1024×1024",
+                        "price": {"image": 0.02}
+                    },
+                    {
+                        "label": "DALL·E 2",
+                        "value": "dalle-2",
+                        "resolution": "512×512",
+                        "price": {"image": 0.0018}
+                    },
+                    {
+                        "label": "DALL·E 2",
+                        "value": "dalle-2",
+                        "resolution": "256×256",
+                        "price": {"image": 0.0016}
+                    }
+                ]
+            },
+            {
+                "value": "audio-models",
+                "label":"Audio models",
+                "children": [
+                    {
+                        "label": "Whisper",
+                        "value": "whisper",
+                        "price": {"minute": 0.006}
+                    },
+                    {
+                        "label": "TTS",
+                        "value": "tts",
+                        "price": {"1M characters":0.15}
+                    },
+                    {
+                        "label": "TTS HD",
+                        "value": "tts-hd",
+                        "price": {"1M characters": 30}
+                    }
+                ]
+            },
+            {
+                "label": "older-models",
+                "value": "Older models",
+                "children":[
+                    {
+                        "label": "gpt-3.5-turbo-1106",
+                        "value": "gpt-3.5-turbo-1106",
+                        "price": {"input": 1, "output": 2}
+                    },
+                    {
+                        "label": "gpt-3.5-turbo-0613",
+                        "value": "gpt-3.5-turbo-0613",
+                        "price": {"input": 1.5, "output": 2}
+                    },
+                    {
+                        "label": "gpt-3.5-turbo-16k-0613",
+                        "value": "gpt-3.5-turbo-16k-0613",
+                        "price": {"input": 3, "output": 4}
+                    },
+                    {
+                        "label": "gpt-3.5-turbo-0301",
+                        "value": "gpt-3.5-turbo-0301",
+                        "price": {"input": 1.5, "output": 2}
+                    },
+                    {
+                        "label": "gpt-3.5-turbo-16k-0613",
+                        "value": "gpt-3.5-turbo-16k-0613",
+                        "price": {"input": 3, "output": 4}
+                    },
+                    {
+                        "label": "gpt-3.5-turbo-0301",
+                        "value": "gpt-3.5-turbo-0301",
+                        "price": {"input": 1.5, "output": 2}
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "label": "Local AI",
+        "value": "Local AI",
+        "settings": {
+            "Prompt Prefix": "none"
+        },
+        "children": {
+            "label": "privateGPT",
+            "value": "Private GPT",
+            "children": [
+                {
+                    "label": "docs-query",
+                    "value": "Docs Query"
+                },
+                {
+                    "label": "docs-search",
+                    "value": "Docs Search"
+                },
+                {
+                    "label": "llm-chat",
+                    "value": "LLM Chat"
+                }
+            ]
+        }
+    },
+    {
+        "label": "Google",
+        "value": "Google",
+        "settings": {
+            "API Key": "a string",
+            "Expiration": 120,
+            "Temperature": 0.20,
+            "Top P": 0.80,
+            "Top K": 40,
+            "Max Output Tokens": 8192,
+            "Prompt Prefix": "a string"
+        },
+        "children": [
+            {
+                "label": "Gemini",
+                "value": "gemini"
+            },
+            {
+                "label": "Gemini Pro",
+                "value": "gemini-pro"
+            },
+            {
+                "label": "Gemini 2",
+                "value": "gemini-2"
+            }
+        ]
+    },
+    {
+        "label": "Anthropic",
+        "value": "Anthropic",
+        "settings": {
+                "Model": "model_name",
+                "API Key": "a string",
+                "Expiration": 120,
+                "Temperature": 1.00,
+                "Top P": 0.70,
+                "Top K": 5,
+                "Max Output Tokens": 4000,
+                "Prompt Prefix": "a string"
+        },
+        "children": [
+            {
+                "label": "Claude-1",
+                "value": "claude-1"
+            },
+            {
+                "label": "Claude-instant-1",
+                "value": "claude-instant-1"
+            },
+            {
+                "label": "Claude-2",
+                "value": "claude-1"
+            }
+        ]
+    }
+]
