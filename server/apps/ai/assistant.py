@@ -6,13 +6,14 @@ from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from time import sleep
+import gridfs
 
 client = OpenAI()
 
 mongo_uri = "mongodb://localhost:27017/"
 mongo_client = MongoClient(mongo_uri)
 db = mongo_client['FYP']
-
+fs = gridfs.GridFS(db)
 
 @ai_bp.route('/gpt_assistant', methods=['GET'])
 def hello_gpt_assistant():
@@ -158,36 +159,34 @@ def handle_file_actions():
         return jsonify({'success': False, 'error': e})
 
 
-def update_database(assistant_id, name, model, instructions, file_ids):
-    models_collection = db.models
-    new_setting = {
-        "id": assistant_id,
-        "model": model,
-        "prompt-prefix": instructions,
-        "file-ids": file_ids,
-        "name": name
-    }
-    query = {"value": "openai-assistant"}
-    new_setting['model'] = ["gpt-3.5-turbo-16k-0613"]
-    current_collection = models_collection.find_one(query, {"setting": 1, "children": 1, "_id": 0})
-    # current_setting = current_collection["setting"]
-    children = current_collection["children"]
-    print(type(children))
-    for item in children:
-        for child in item["children"]:
-            if child["value"] == new_setting['model'][0]:
-                new_setting['model'].insert(0, item["value"])
-                break
-    current_setting = current_collection["setting"]
-    for key, value in current_setting.items():
-        if key not in new_setting:
-            new_setting[key] = value
+@ai_bp.route('/gpt_assistant/assistant_list', methods=['GET'])
+def get_assistant_list():
+    try:
+        my_assistants = client.beta.assistants.list(
+            order="desc",
+            limit=20,
+        )
+        assistant_list = []
+        for item in my_assistants.data:
+            assistant_item = {"label": item.id, "value": item.id }
+            assistant_list.append(assistant_item)
+        # assistant_list.append({"label": "Create A New One", "value": "" })
+        return jsonify({'success': False, "list": assistant_list}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': e}), 400
 
-    update = {"$set": {"setting": new_setting}}
-    update_label = {"$set": {"label": name}}
-    models_collection.update_one(query, update)
-    models_collection.update_one(query, update_label)
-    return new_setting
+
+@ai_bp.route('/gpt_assistant/delete_assistant', methods=['GET'])
+def delete_assistant():
+    try:
+        assistant_id = request.args.get('assistant_id')
+        response = client.beta.assistants.delete(assistant_id)
+        if response.deleted:
+            return jsonify({'success': True,}), 200
+        else:
+            return jsonify({'success': False}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': e}), 400
 
 
 @ai_bp.route('/gpt_assistant/chat', methods=['POST'])
@@ -200,16 +199,15 @@ def assistant_chat():
     # 获取用户的消息
     data = request.get_json()
     chat_id = data.get("chat_id", None)
-    user_content = data.get("content", None)
+    # user_content = data.get("content", None)
 
     # 获取thread_id
-    chats_collection = db.chats
     thread_id = None
+    chats_collection = db.chats
     if chat_id:
         query = {'_id': ObjectId(chat_id)}
-        chats_collection = db.chats
-        thread_id = chats_collection.update_one(query, {'_id': 0, 'thread_id': 1})
-        thread_id = thread_id['thread_id']
+        thread_id = chats_collection.find_one(query, {'_id': 0, 'thread-id': 1})
+        thread_id = thread_id['thread-id']
 
     # 运行thread with assistant
     if thread_id and assistant_id:
@@ -232,7 +230,70 @@ def assistant_chat():
             sleep(0.5)
         if run.status == "completed":
             messages = client.beta.threads.messages.list(
-                thread_id=thread_id
+                thread_id=thread_id,
+                order="asc"
             )
-            messages = messages.data
-            return jsonify(messages), 200
+
+            query = {'_id': ObjectId(chat_id)}
+            messages_in_db = chats_collection.find_one(query, {'_id': 0, 'messages': 1})
+            len_messages_in_db = len(messages_in_db['messages'])
+            for item in messages.data[len_messages_in_db:]:
+                this_message = item.content
+                new_message = {}
+                for stuff in this_message:
+                    content_type = stuff.type
+                    if content_type == 'text':
+                        message = stuff.text.value
+                        new_message["content"] = message
+                        new_message["role"] = "assistant",
+                        new_message["timestamp"] = item.created_at
+                    elif content_type == 'image_file':
+                        image_id = stuff.image_file.file_id
+                        image = client.files.with_raw_response.retrieve_content(image_id).content
+                        with open("plot.png", "wb") as f:
+                            f.write(image)
+                        with open('plot.png', 'rb') as image_file:
+                            file_id = fs.put(image_file, filename="result.png")
+                        new_message["image_id"] = str(file_id)
+                if new_message:
+                    update = {'$push': {'messages': new_message}}
+                    result = chats_collection.update_one(query, update)
+                    if not result.modified_count > 0:
+                        return jsonify(
+                            {'success': False, 'message': 'No chat found with given ID or no update made.'}), 404
+
+
+            return jsonify({'success': True}), 200
+
+
+def update_database(assistant_id, name, model, instructions, file_ids):
+    models_collection = db.models
+    new_setting = {
+        "id": assistant_id,
+        "model": model,
+        "prompt-prefix": instructions,
+        "file-ids": file_ids,
+        "name": name
+    }
+    query = {"value": "openai-assistant"}
+    if len(new_setting['model']) == 0:
+        new_setting['model'] = ["gpt-3.5-turbo-16k-0613"]
+    current_collection = models_collection.find_one(query, {"setting": 1, "children": 1, "_id": 0})
+    # current_setting = current_collection["setting"]
+    children = current_collection["children"]
+    print(type(children))
+    for item in children:
+        for child in item["children"]:
+            if child["value"] == new_setting['model'][0]:
+                new_setting['model'].insert(0, item["value"])
+                break
+    current_setting = current_collection["setting"]
+    for key, value in current_setting.items():
+        if key not in new_setting:
+            new_setting[key] = value
+
+    update = {"$set": {"setting": new_setting}}
+    # update_label = {"$set": {"label": name}}
+    models_collection.update_one(query, update)
+    # models_collection.update_one(query, update_label)
+    return new_setting

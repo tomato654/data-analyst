@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 
 import { Select, Modal, Form,  Input, Cascader, Tooltip, Button, Upload, message, Spin, Divider, InputNumber } from 'antd';
-import { InfoCircleOutlined, UploadOutlined, FileOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined, UploadOutlined, FileOutlined, DeleteOutlined } from '@ant-design/icons';
 import { setSelectedToUseCompany, fetchChildrenModels, fetchToUseModel, setSelectedToUseModel } from '@/store/modules/models';
 
 import NumberSlider from './NumberSlider';
@@ -11,11 +11,14 @@ import { axios_instance } from '@/utils';
 import FilesManagement from '../FilesManagement';
 import './index.scss';
 
+const { confirm } = Modal;
 const { Option } = Select;
 
 const App = ( { open, onCreate, onCancel, selectedSetting } ) => {
     const dispatch = useDispatch();
     const [form] = Form.useForm();
+    
+
     const filter = (inputValue, path) =>
         path.some((option) => option.label.toLowerCase().indexOf(inputValue.toLowerCase()) > -1);
 
@@ -26,6 +29,58 @@ const App = ( { open, onCreate, onCancel, selectedSetting } ) => {
 
     const cascaderOptions = useSelector( store => store.model.childrenModels );
     const savedSettings = useSelector( store => store.model.currentSetting );
+
+    const [assistantOptions, setAssistantOptions] = useState([]);
+    const assistantOnChange = async () => {
+        await dispatch(fetchChildrenModels({assistant_id: form.getFieldValue('id')}))
+    }
+
+   
+    const [createAssistant, setCreateAssistant] = useState(false);
+    useEffect(() => {
+        const fetchAssistantList = async () => {
+            const res = await axios_instance.get('/gpt_assistant/assistant_list')
+            const options = res.data.list.map(item => ({
+                label: (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        {item.value}
+                        <DeleteOutlined onClick={() => showDeleteConfirm(item.value)}/>
+                    </div>
+                ),
+                value: item.value,
+                name: item.value
+            }));
+            console.log("这是助手列表",options)
+            setAssistantOptions(options)
+        }
+        fetchAssistantList()
+    }, [createAssistant])
+
+    const showDeleteConfirm = (id) => {
+        confirm({
+            title: 'Are you sure delete this tab?',
+            cancelButtonProps: { style: { color: 'white', backgroundColor: 'rgb(255, 77, 79)' } },
+            okText: 'Delete',
+            okType: 'default',
+            cancelText: 'CANCEL',
+            onOk() {
+                try {
+                    axios_instance.get('/gpt_assistant/delete_assistant',{
+                        params:{ assistant_id: id }
+                    }).then(() =>{
+                        setCreateAssistant(!createAssistant)
+                        dispatch(fetchChildrenModels({reset: false}))
+                        form?.resetFields();
+                    })
+                }catch (error) {
+                    console.log(error)
+                }
+            },
+            onCancel() {
+                console.log('Cancel');
+            },
+        });
+    };
 
     useEffect(() => {
         const keys = Object.keys(savedSettings);
@@ -93,18 +148,6 @@ const App = ( { open, onCreate, onCancel, selectedSetting } ) => {
     const modelValue = form.getFieldValue('model');
     const isPrivateGPT = Array.isArray(modelValue) && modelValue[0] === "private-gpt";
 
-    const [assistantId, setAssistantId] = useState('');
-    const handleAssitantChange = (e) => {
-        setAssistantId(e.target.value);
-    }
-    const loadAssistant = async () => {
-        if (assistantId) {
-            await(dispatch(fetchChildrenModels({assistant_id: assistantId})))
-        }
-        else{
-            message.error("Please input assistant id and api key")
-        }
-    }
     const resetAssistant = async () => {
         await(dispatch(fetchChildrenModels({reset: false})))
         form?.resetFields();
@@ -117,9 +160,12 @@ const App = ( { open, onCreate, onCancel, selectedSetting } ) => {
             title= {`Setting ${selectedSetting.label}`}
             onCancel={onCancel}
             destroyOnClose
-            onOk={() => {
+            onOk={ async () => {
                 const values = form?.getFieldsValue();
-                onCreate(values);
+                await onCreate(values);
+                if (selectedSetting.value === 'openai-assistant') {
+                    setCreateAssistant(!createAssistant);
+                }
             }}
             okText="Save"
             width={650}
@@ -159,12 +205,12 @@ const App = ( { open, onCreate, onCancel, selectedSetting } ) => {
 
                 { selectedSetting.value === 'openai-assistant' ? <Form.Item
                     label= "Assistant ID"
-                    name="id"
                     className='setting-form-item-assistant-id'
                 >
-                    <Input placeholder="Input Your Assistant ID" value={assistantId} onChange={handleAssitantChange}/>
-                    <Button onClick={loadAssistant} type='primary'>Load</Button>
-                    <Button onClick={resetAssistant}>Reset</Button>
+                    <Form.Item name="id" className='setting-form-item-assistant-id-input'>
+                        <Select placeholder="Input Your Assistant ID" options={assistantOptions} onChange={assistantOnChange} optionLabelProp="name"/>
+                    </Form.Item>
+                    <Button onClick={resetAssistant} type='primary'>NEW</Button>
                 </Form.Item> : null}
 
                 { selectedSetting.value === 'openai-assistant' ? <Form.Item
@@ -363,7 +409,7 @@ const App = ( { open, onCreate, onCancel, selectedSetting } ) => {
                     valuePropName="value"
                     getValueFromEvent={(value) => value}
                 >
-                    <FilesManagement />
+                    <FilesManagement initialValues={ savedSettings } />
                 </Form.Item> : null}
 
                 

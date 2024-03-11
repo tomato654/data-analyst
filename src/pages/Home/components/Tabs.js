@@ -5,6 +5,8 @@ import { setActiveId, fetchTabsInfo,  } from '@/store/modules/messages';
 import { DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { axios_instance } from '@/utils'
+import { setSelectedToUseCompany, setSelectedToUseModel  } from '@/store/modules/models';
+
 const { confirm } = Modal;
 
 const App = () => {
@@ -13,8 +15,6 @@ const App = () => {
     const dispatch = useDispatch()
 
     const [activeKey, setActiveKey] = useState();
-    const [items, setItems] = useState([]);
-
     
     const currentID = useSelector( store => store.message.activeId )
     const tabsInfo = useSelector( store => store.message.tabsInfo );
@@ -43,7 +43,7 @@ const App = () => {
                         navigate('/')
                     })
                 }catch (error) {
-
+                    console.log(error)
                 }
             },
             onCancel() {
@@ -63,8 +63,6 @@ const App = () => {
         )
     }));
 
-
-
     useEffect(()=>{
         setActiveKey(currentID)
     },[currentID])
@@ -78,6 +76,8 @@ const App = () => {
     const add = () => {
         navigate('/')
         dispatch(setActiveId(''))
+        dispatch(setSelectedToUseCompany("local-ai"))
+        // dispatch(setSelectedToUseModel(["private-gpt", "LLM Chat"]))
     };
 
     return (

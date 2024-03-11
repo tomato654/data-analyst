@@ -63,6 +63,10 @@ export const sendUserMessageToBot = createAsyncThunk(
     async (userMessage, {rejectWithValue}) => {
         try {
             console.log("看看这里的userMessage",userMessage)
+            if(userMessage.modelPath[0] === 'openai-assistant'){
+                const req = await axios_instance.post('/gpt_assistant/chat',userMessage)
+                return req.data
+            }
             const req = await axios_instance.post('/v1/completions',userMessage)
             return req.data
         } catch (error) {

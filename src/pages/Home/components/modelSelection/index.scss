@@ -19,7 +19,14 @@
     .ant-form-item-control{
         .ant-form-item-control-input-content{
             display: grid;
-            grid-template-columns: auto auto auto;
+            grid-template-columns: auto 100px;
+            grid-column-gap: 20px;
+            .setting-form-item-assistant-id-input{
+                .ant-form-item-control-input-content{
+                    display: grid;
+                    grid-template-columns: auto;
+                }
+            }
         }
     }
 }

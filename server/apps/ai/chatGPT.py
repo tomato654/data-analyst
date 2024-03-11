@@ -89,7 +89,7 @@ def upload_files():
                 file=open(file_path, "rb"),
                 purpose='assistants'
             )
-            os.remove(file_path)  # Delete file after uploading
+            # os.remove(file_path)  # Delete file after uploading
             return jsonify({'success': True, 'message': 'New file added to open ai', 'response': response}), 200
     except Exception as e:
         return jsonify({'error': str(e)})
@@ -105,7 +105,7 @@ def handle_action():
         if action == 'list_files':
             files_response = client.files.list()
             # 假设files_response有一个名为files的属性，该属性是一个列表
-            files_list = [{"filename": file.filename, "key": file.id, "bytes": file.bytes} for file in files_response.data]
+            files_list = [{"filename": file.filename, "key": file.id, "bytes": file.bytes} for file in files_response.data if file.bytes]
             return jsonify({'success': True, 'message': 'Files listed successfully', 'list': files_list}), 200
 
         elif action == 'retrieve_file':

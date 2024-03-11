@@ -28,15 +28,15 @@ def private_gpt_chat():
             system_prompt = setting['prompt-prefix']
 
         system_prompt = ""
-        # client = Client("http://localhost:8001/")
-        # response = client.predict(
-        #     user_message['content'],
-        #     user_message['using_model'],
-        #     [],
-        #     system_prompt,
-        #     api_name="/chat"
-        # )
-        response="TEST, TEST, TEST"
+        client = Client("http://localhost:8001/")
+        response = client.predict(
+            user_message['content'],
+            user_message['using_model'],
+            [],
+            system_prompt,
+            api_name="/chat"
+        )
+        # response="TEST, TEST, TEST"
         print(response)
         return jsonify({"response": response}), 200
     except Exception as e:
@@ -47,9 +47,10 @@ def private_gpt_chat():
 @ai_bp.route('/private-gpt/set_system_prompt', methods=['POST'])
 def set_system_prompt():
     update_prompt = request.get_json()
+    text = update_prompt['prompt-prefix']
     client = Client("http://localhost:8001/")
     prompt_update_response = client.predict(
-        update_prompt['prefix-prompt'],
+        text,
         api_name="/_set_system_prompt"
     )
     if prompt_update_response:

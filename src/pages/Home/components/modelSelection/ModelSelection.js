@@ -59,7 +59,7 @@ const App = () => {
     // 获取选中公司的设置信息
     useEffect(() => {
         dispatch(fetchChildrenModels(selectedSetting.value))
-    },[selectedSetting])
+    },[selectedSetting, dispatch])
 
     // 选中公司的回调函数
     const handleChange = async (value) => {
@@ -75,7 +75,6 @@ const App = () => {
 
     const onCreate = async (values) => {
         if (selectedSetting.value === 'openai-assistant') {
-            console.log("成功提交表单",values)
             await axios_instance.post('/gpt_assistant/modify_assistant', values)
         }
         else{
@@ -86,8 +85,6 @@ const App = () => {
                 model: selectedSetting.value
             })
         }
-        
-        // console.log("提交表单",values)
         await setOpenModal(false);
     };
 
@@ -102,6 +99,9 @@ const App = () => {
                     }
                 });
                 setDefaultModel(response.data.model[0])
+            }
+            else{
+                setDefaultModel('local-ai')
             }
         }
         fetchUsingModel()

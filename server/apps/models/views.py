@@ -54,6 +54,8 @@ def update_setting():
             })
             if update_prompt.ok:
                 return jsonify({"success": True, "message": "Settings updated successfully."}), 200
+            else:
+                return jsonify({"success": False, "message": "Fail to update private GPT prompt."}), 500
 
         return jsonify({"success": True, "message": "Settings updated successfully."}), 200
     elif result.upserted_id is not None:

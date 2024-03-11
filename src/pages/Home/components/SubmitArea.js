@@ -42,10 +42,10 @@ const SubmitArea = ( {sendSubmitAreaMsg}, props ) => {
         if(currentID) {
             aNewUserMsg.chat_id = currentID;
             await dispatch(sendUserMessage(aNewUserMsg));
+            await setUserInput('');
             await dispatch(setUpdateMessageRender())
             await dispatch(sendUserMessageToBot(aNewUserMsg));
             await dispatch(setUpdateMessageRender())
-            await setUserInput('');
         }
         else {
             const req = await axios_instance.post('/chats/update_chats',aNewUserMsg)
@@ -86,6 +86,7 @@ const SubmitArea = ( {sendSubmitAreaMsg}, props ) => {
         <div className='submit-area'>
             { toUseCompany === 'openai' ? <FilesManagement getFiles={setSelectedFiles}/> : null}
             <Switch disabled={disabledWebSearchSwitch} onChange={onChange} />
+
             <TextArea
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}

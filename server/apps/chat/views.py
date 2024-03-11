@@ -7,6 +7,9 @@ import requests
 from datetime import datetime
 import pytz
 from openai import OpenAI
+import gridfs
+import base64
+
 
 client = OpenAI()
 # 链接mongoDB
@@ -14,6 +17,7 @@ mongo_uri = "mongodb://localhost:27017/"
 mongo_client = MongoClient(mongo_uri)
 db = mongo_client['FYP']
 chats_collection = db.chats
+fs = gridfs.GridFS(db)
 
 
 @chats_bp.route('/chats', methods=['GET'])
@@ -31,7 +35,16 @@ def get_all_chats():
             return jsonify({'error': str(e)}), 400
 
         if chat:
-            chat['_id'] = str(chat['_id'])  # 将ObjectId转换为字符串，以便能够序列化为JSON
+            chat['_id'] = str(chat['_id'])
+            try:
+                for message in chat['messages']:
+                    if message.get("image_id", None):
+                        grid_out = fs.get(ObjectId(message['image_id']))
+                        image_data = grid_out.read()
+                        base64_image = base64.b64encode(image_data).decode('utf-8')
+                        message['image'] = base64_image
+            except Exception as e:
+                return jsonify({'error': str(e)}), 400
             return jsonify(chat)
         else:
             return jsonify({'error': 'Document not found'}), 404
@@ -41,7 +54,6 @@ def get_all_chats():
 def update_chats():
     update_chat = request.get_json()
     chat_id = update_chat.get('chat_id')
-    file_ids = update_chat.get('file_ids')
     new_message = update_chat["message"]
     user_input = new_message.get("content", "")
 
@@ -54,6 +66,10 @@ def update_chats():
             'model': update_chat['modelPath'],
             'messages': [new_message]
         }
+        models_collection = db.models
+        query = {"value": "openai-assistant"}
+        setting = models_collection.find_one(query, {"setting": 1, "_id": 0})
+        file_ids = setting['setting']['file-ids']
         thread_id = None
         if not thread_id and update_chat['modelPath'][0] == 'openai-assistant':
             thread_id = client.beta.threads.create(
@@ -66,7 +82,8 @@ def update_chats():
                 ]
             )
             thread_id = str(thread_id.id)
-            new_chat['thread_id'] = thread_id
+            new_chat['thread-id'] = thread_id
+            new_chat['file-ids'] = file_ids
         result = chats_collection.insert_one(new_chat)
         if result.inserted_id:
             return jsonify({'success': True, 'message': 'New chat created.','chat_id': str(result.inserted_id)}), 201
@@ -74,12 +91,21 @@ def update_chats():
             return jsonify({'success': False, 'message': 'Failed to create new chat.'}), 500
 
     else:
-        try:
-            query = {'_id': ObjectId(chat_id)}
-        except InvalidId:
-            return jsonify({'error': 'Invalid chat_id format'}), 400
+        query = {'_id': ObjectId(chat_id)}
         update = {'$push': {'messages': new_message}}
         result = chats_collection.update_one(query, update)
+
+        thread_id = chats_collection.find_one({'_id': ObjectId(chat_id)}, {'_id': 0, 'thread-id': 1})
+        if thread_id:
+            thread_id = thread_id['thread-id']
+            try:
+                client.beta.threads.messages.create(
+                    thread_id,
+                    role="user",
+                    content=user_input,
+                )
+            except Exception as e:
+                return jsonify({'success': False, 'error': str(e)}), 500
 
         if result.modified_count > 0:
             return jsonify({'success': True, 'message': 'Message added to chat.', 'chat_id': chat_id}), 200
@@ -123,6 +149,12 @@ def delete_chat():
 
     try:
         # 删除具有指定_id的文档
+        chat_to_delete = chats_collection.find_one({'_id': ObjectId(chat_id)}, {'_id': 0})
+        thread_id = None
+        if chat_to_delete['thread-id']:
+            thread_id = chat_to_delete['thread-id']
+            response = client.beta.threads.delete(thread_id)
+
         result = chats_collection.delete_one({'_id': ObjectId(chat_id)})
         if result.deleted_count == 1:
             return jsonify({'success': True, 'message': 'Chat deleted'}), 200

@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
-import { Modal, Button, Upload, List, message, Spin, Checkbox, Table } from 'antd';
+import { Modal, Button, Upload, List, message, Spin, Form, Table } from 'antd';
 import { UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import { axios_instance } from '@/utils'
 
-const FilesManagement = ({value, assistant_id, onChange}) => {
+const FilesManagement = ({initialValues , onChange}) => {
 
-    // const [isModalVisible, setIsModalVisible] = useState(false);
     const [fileListGPT, setFileListGPT] = useState([]);
-    // const [fileListAssistant, setFileListAssistant] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
     const [fileUploaded, setFileUploaded] = useState(false);
     const [filesloading, setFilesloading] = useState(true);
+
+    useEffect(() => {
+        if(initialValues){
+            setSelectedRowKeys(initialValues['file-ids'])
+        }
+    },[initialValues])
 
     useEffect(() => {
         const fetchFileList = async () => {
@@ -23,22 +27,6 @@ const FilesManagement = ({value, assistant_id, onChange}) => {
                 });
                 if(response.data.list.length > 0){
                     setFileListGPT(response.data.list);
-                    if(assistant_id){
-                        const file_list = await axios_instance.get('/gpt_assistant/file_action',{
-                            params: {
-                                action: 'list_file',
-                                assistant_id: assistant_id
-                            }
-                        })
-                        console.log("在这个小助手内的文件",file_list.data.list)
-                        if(file_list.data.list.length > 0){
-                            setSelectedRowKeys(file_list.data.list);
-                        }
-                        else{
-                            setSelectedRowKeys([]);
-                        }
-                        setSelectedRowKeys(file_list.data.list)
-                    }
                 }
                 else{
                     setFileListGPT([]);
