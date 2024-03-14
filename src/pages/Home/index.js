@@ -75,7 +75,7 @@ const App = () => {
           }}
         >
           <ModelSelection/>
-          { isLogined ? <UserInfo/> : <Login/> }
+          {/* { isLogined ? <UserInfo/> : <Login/> } */}
         </Header>
 
 

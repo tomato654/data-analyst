@@ -3,7 +3,7 @@ import { Modal, Button, Upload, List, message, Spin, Form, Table } from 'antd';
 import { UploadOutlined, DeleteOutlined } from '@ant-design/icons';
 import { axios_instance } from '@/utils'
 
-const FilesManagement = ({initialValues , onChange}) => {
+const FilesManagement = ({initialValues , onChange, getFiles}) => {
 
     const [fileListGPT, setFileListGPT] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -113,9 +113,9 @@ const FilesManagement = ({initialValues , onChange}) => {
     const rowSelection = {
         selectedRowKeys,
         onChange: (newSelectedRowKeys, newSelectedRows) => {
-            console.log(`selectedRowKeys: ${newSelectedRowKeys}`, 'selectedRows: ', newSelectedRows);
             setSelectedRowKeys(newSelectedRowKeys)
             triggerChange(newSelectedRowKeys)
+            getFiles(newSelectedRows)
         }
     };
 
@@ -131,7 +131,7 @@ const FilesManagement = ({initialValues , onChange}) => {
                     dataSource={fileListGPT}
                     pagination={false}
                     scroll={{
-                        y: 240,
+                        y: 200,
                     }}
                     size="small"
                 />

@@ -4,7 +4,8 @@ import { axios_instance } from '@/utils'
 import ReactMarkdown from 'react-markdown';
 import 'github-markdown-css';
 import { setSelectedToUseCompany, setSelectedToUseModel  } from '@/store/modules/models';
-
+import { TableOutlined, FileWordOutlined, FileImageOutlined, FileUnknownOutlined, FilePdfOutlined } from '@ant-design/icons';
+import './index.scss'
 
 
 const Message = () =>{
@@ -21,7 +22,6 @@ const Message = () =>{
                 const req = await axios_instance.get('/chats/get_chats',{
                     params:{chat_id:currentChatId}
                 })
-                console.log("asdfasdfas返回的消息",req.data)
                 await setCurrentModel(req.data.model)
                 await setCurrentChat(req.data.messages)
                 await dispatch(setSelectedToUseCompany(req.data.model[0]))
@@ -34,13 +34,58 @@ const Message = () =>{
         fetchChat()
     },[currentChatId, updateMessage])
 
-    const UserMessage = (props) => {
-        return(
-            <div className="message-box-user">
-                <div className='message-box-role'>You</div>
-                <ReactMarkdown>{props.msg}</ReactMarkdown>
+    const FileCard = (props) => {
+        const filename = props.filename
+        const extension = filename.split(".").pop().toLowerCase()
+        return (
+            <div 
+                className="file-card"
+            >
+                {
+                    (extension === 'png' || extension === 'jpg' || extension === 'jpeg' || extension === 'gif') ?
+                        (<FileImageOutlined  className='file-icon'/>)
+                    : (extension === 'pdf') ?
+                        (<FilePdfOutlined className='file-icon'/>)
+                    : (extension === 'doc' || extension === 'docx') ?
+                        (<FileWordOutlined className='file-icon'/>)
+                    : (extension === 'xls' || extension === 'xlsx' || extension === 'csv') ?
+                        (<TableOutlined style={{ backgroundColor: "orange"}} className='file-icon'/>)
+                    :
+                        (<FileUnknownOutlined className='file-icon'/>)
+                }
+                <span className='file-name'>{filename}</span>
+                <span className='file-extension'>.{extension} File</span>
             </div>
-        )
+        );
+    }
+
+    const UserMessage = (props) => {
+        if(props.files){
+            return(
+                <div className="message-box-user">
+                    <div className='message-box-role'>You</div>
+                    <div className="markdown-body">
+                        <ReactMarkdown>{props.msg}</ReactMarkdown>
+                    
+                        <div className="file-list">
+                            {
+                                props.files.map(
+                                    (item, index) => <FileCard key={index} filename={item.filename} />
+                                )
+                            }
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+        else{
+            return(
+                <div className="message-box-user">
+                    <div className='message-box-role'>You</div>
+                    <ReactMarkdown>{props.msg}</ReactMarkdown>
+                </div>
+            )
+        }
     }
   
     const AiMessage = (props) => {
@@ -75,7 +120,7 @@ const Message = () =>{
 
     const ConditionalRender = (props) => {
         if(props.item.role === 'user') {
-            return <UserMessage msg={props.item.content}/>
+            return <UserMessage msg={props.item.content} files={props.item.files}/>
         }
         else{
             return <AiMessage msg={props.item.content} img={props.item.image}/>

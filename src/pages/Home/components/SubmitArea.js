@@ -1,6 +1,6 @@
-import { Input, Button, Switch  } from 'antd';
+import { Input, Button, Switch, Modal  } from 'antd';
 import React, { useEffect, useState} from 'react';
-import { RiseOutlined } from '@ant-design/icons';
+import { RiseOutlined, LinkOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useSelector, useDispatch } from 'react-redux'
 import { axios_instance } from '@/utils'
 import { fetchTabsInfo, sendUserMessage, sendUserMessageToBot, setActiveId, setUpdateMessageRender } from '@/store/modules/messages'
@@ -22,7 +22,14 @@ const SubmitArea = ( {sendSubmitAreaMsg}, props ) => {
     const toUseModel = useSelector( store => store.model.selectedToUseModel )
     const modelPath = [toUseCompany, ...toUseModel]
 
+    // 上传中
+    const [ uploading, setUploading ] = useState(false)
+
     const currentID = useSelector( store => store.message.activeId )
+
+    // useEffect(() => {
+    //     console.log("selectedFiles改变了", selectedFiles)
+    // },[selectedFiles])
 
     const submit = async () => {
         let aNewUserMsg = {  
@@ -32,22 +39,25 @@ const SubmitArea = ( {sendSubmitAreaMsg}, props ) => {
             },
             modelPath: modelPath
         };
-        if(selectedFiles.length > 0 && toUseCompany === 'openai' && webSearch === false){
-            aNewUserMsg.files = selectedFiles
+        if(selectedFiles.length > 0 && toUseCompany === 'openai-assistant' && webSearch === false){
+            aNewUserMsg.message.files = selectedFiles
         }
         if(webSearch === true  && toUseCompany === 'openai'){
             aNewUserMsg.webSearch = true
         }
-    
         if(currentID) {
+            setUploading(true)
             aNewUserMsg.chat_id = currentID;
             await dispatch(sendUserMessage(aNewUserMsg));
             await setUserInput('');
             await dispatch(setUpdateMessageRender())
             await dispatch(sendUserMessageToBot(aNewUserMsg));
             await dispatch(setUpdateMessageRender())
+            setUploading(false)
+
         }
         else {
+            setUploading(true)
             const req = await axios_instance.post('/chats/update_chats',aNewUserMsg)
             await dispatch(fetchTabsInfo())
             await setUserInput('');
@@ -56,11 +66,11 @@ const SubmitArea = ( {sendSubmitAreaMsg}, props ) => {
             aNewUserMsg.chat_id = await req.data.chat_id
             await dispatch(sendUserMessageToBot(aNewUserMsg))
             await dispatch(setUpdateMessageRender())
+            setUploading(false)
         }
     }
 
     const onClick = async () => {
-        // console.log(selectedFiles)
         await submit()
     }
 
@@ -82,10 +92,47 @@ const SubmitArea = ( {sendSubmitAreaMsg}, props ) => {
         }
     }
 
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    
+
+    const showModal = () => {
+        setIsModalVisible(true);
+    };
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
+    // const testClick = async () => {
+    //     await axios_instance.get('/gpt_assistant/list_message')
+    // }
+
     return(
         <div className='submit-area'>
-            { toUseCompany === 'openai' ? <FilesManagement getFiles={setSelectedFiles}/> : null}
-            <Switch disabled={disabledWebSearchSwitch} onChange={onChange} />
+            
+            { toUseCompany === 'openai-assistant' ? 
+                <Button 
+                    onClick={showModal} 
+                    icon={<LinkOutlined />} 
+                    className='submit-area-film-management-btn'
+                />
+                : null
+            }
+            <div className='submit-area-web-search'>
+                <span>Web Search</span>
+                <Switch disabled={disabledWebSearchSwitch} onChange={onChange}/>
+            </div>
+            
+            
+
+            <Modal
+                title="Upload Files"
+                open={isModalVisible}
+                onCancel={handleCancel}
+                width={650}
+                className='submit-area-file-management-modal'
+            >
+                <FilesManagement getFiles={setSelectedFiles}/>
+            </Modal>
 
             <TextArea
                 value={userInput}
@@ -96,9 +143,12 @@ const SubmitArea = ( {sendSubmitAreaMsg}, props ) => {
                     maxRows: 5,
                 }}
             />
-            <Button type="primary" className='submit-btn' onClick={onClick} tabIndex={0} >
-                <RiseOutlined />
-            </Button>
+            { uploading ? 
+                <Button className='submit-btn' tabIndex={0} icon={<LoadingOutlined />} disabled/> :
+                <Button className='submit-btn' onClick={onClick} tabIndex={0} icon={<RiseOutlined />} />
+            }
+            
+            {/* <Button onClick={testClick}></Button> */}
         </div>
         
     )

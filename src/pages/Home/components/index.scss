@@ -53,6 +53,8 @@
         border-radius: 12px 0px 0px 12px;
         border: 0.5px solid black;
         margin-left: 40px;
+        // background-color: #0d1117;
+        // color: #fff;
     }
     
     .message-box-ai {
@@ -65,25 +67,69 @@
         padding: 10px 15px 15px 20px;
         border: 0.5px solid black;
         margin-right: 40px;
-        border-radius: 0px 12px 10px 2px;
+        border-radius: 0px 20px 20px 0px;
+        // background-color: #0d1117;
+
+        
+    }
+
+    .message-box-role{
+        font-size: 18px;
+        font-weight: 600;
+        position: relative;
+        margin-bottom: 20px;
+        // color: #fff;
+    
+        &::after{
+            position: absolute;
+            content: '';
+            height: 1px;
+            border-left: 100px solid #000;
+            top: 30px;
+            left: 0px;
+        }
     }
 
 }
 
-.message-box-role{
-    font-size: 18px;
-    font-weight: 600;
-    position: relative;
-    margin-bottom: 20px;
 
-    &::after{
-        position: absolute;
-        content: '';
-        height: 1px;
-        border-left: 100px solid black;
-        top: 30px;
-        left: 0px;
+.file-card{
+    border: 1px solid #fff;
+    border-radius: 8px;
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    grid-template-areas: 
+    "icon filename"
+    "icon extension";
+    padding: 5px 20px 5px 5px;
+    .file-icon{
+        grid-area: icon;
+        font-size: 22px;
+        align-self: center;
+        padding: 8px;
+        border-radius: 8px;
     }
+    .file-name{
+        grid-area: filename;
+        align-self: end;
+        font-size: 15px;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+    .file-extension{
+        grid-area: extension;
+        align-self: center;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 10px;
+        color: #999;
+    }
+}
+
+// --------------- overwrite markdown.css ------------
+.markdown-body{
+    color: #000 !important;
+    background-color: #fff !important;
 }
 
 
@@ -128,3 +174,45 @@
     }
 }
 
+// ----------------- SubmitArea.js ----------------
+.submit-area{
+    width: 100%;
+    display: flex;
+    // grid-template-columns: auto auto;
+    justify-content: center;
+    align-items: center;
+    textarea{
+        width: 75%;
+        min-width: 400px;
+        line-height: 20px;
+        font-size: 16px;
+        padding: 15px 80px 15px 55px;
+        border-radius: 10px;
+        border: 1px solid #999;
+    }
+    .submit-btn{
+        width: 35px;
+        height: 35px;
+        padding: 0 !important;
+        border-radius: 10px;
+        right: 42px;
+        font-size: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        // background-color: #000;
+    }
+    .submit-area-film-management-btn{
+        width: 35px;
+        height: 35px;
+        padding: 0 !important;
+        border-radius: 10px;
+        left: 162px;
+        font-size: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        // background-color: #000;
+    }
+}

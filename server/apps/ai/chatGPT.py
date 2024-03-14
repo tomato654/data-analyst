@@ -89,7 +89,6 @@ def upload_files():
                 file=open(file_path, "rb"),
                 purpose='assistants'
             )
-            # os.remove(file_path)  # Delete file after uploading
             return jsonify({'success': True, 'message': 'New file added to open ai', 'response': response}), 200
     except Exception as e:
         return jsonify({'error': str(e)})

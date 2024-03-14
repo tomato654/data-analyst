@@ -50,7 +50,6 @@ const App = ( { open, onCreate, onCancel, selectedSetting } ) => {
                 value: item.value,
                 name: item.value
             }));
-            console.log("这是助手列表",options)
             setAssistantOptions(options)
         }
         fetchAssistantList()

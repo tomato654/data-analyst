@@ -28,26 +28,29 @@ def index():
 @chats_bp.route('/chats/get_chats', methods=['GET'])
 def get_all_chats():
     chat_id = request.args.get('chat_id', None)
-    if chat_id:
-        try:
-            chat = chats_collection.find_one({'_id': ObjectId(chat_id)})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 400
-
-        if chat:
-            chat['_id'] = str(chat['_id'])
+    try:
+        if chat_id:
             try:
-                for message in chat['messages']:
-                    if message.get("image_id", None):
-                        grid_out = fs.get(ObjectId(message['image_id']))
-                        image_data = grid_out.read()
-                        base64_image = base64.b64encode(image_data).decode('utf-8')
-                        message['image'] = base64_image
+                chat = chats_collection.find_one({'_id': ObjectId(chat_id)})
             except Exception as e:
                 return jsonify({'error': str(e)}), 400
-            return jsonify(chat)
-        else:
-            return jsonify({'error': 'Document not found'}), 404
+
+            if chat:
+                chat['_id'] = str(chat['_id'])
+                try:
+                    for message in chat['messages']:
+                        if message.get("image_id", None):
+                            grid_out = fs.get(ObjectId(message['image_id']))
+                            image_data = grid_out.read()
+                            base64_image = base64.b64encode(image_data).decode('utf-8')
+                            message['image'] = base64_image
+                except Exception as e:
+                    return jsonify({'error': str(e)}), 400
+                return jsonify(chat)
+            else:
+                return jsonify({'error': 'Document not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 
 @chats_bp.route('/chats/update_chats', methods=['POST'])
@@ -55,35 +58,35 @@ def update_chats():
     update_chat = request.get_json()
     chat_id = update_chat.get('chat_id')
     new_message = update_chat["message"]
-    user_input = new_message.get("content", "")
-
     new_message['timestamp'] = int(datetime.now(tz=pytz.UTC).timestamp() * 1000)
+    message_content = new_message.get("content", "")
+    files = new_message.get("files", None)
+    file_ids = []
+    if files:
+        for file in files:
+            file['file_id'] = file.pop('key')
+            file_ids.append(file.file_id)
 
     if not chat_id:
-        title = user_input if len(user_input) < 20 else user_input[:18] + '...'
+        title = message_content if len(message_content) < 20 else message_content[:18] + '...'
         new_chat = {
             'title': title,
             'model': update_chat['modelPath'],
             'messages': [new_message]
         }
-        models_collection = db.models
-        query = {"value": "openai-assistant"}
-        setting = models_collection.find_one(query, {"setting": 1, "_id": 0})
-        file_ids = setting['setting']['file-ids']
         thread_id = None
         if not thread_id and update_chat['modelPath'][0] == 'openai-assistant':
             thread_id = client.beta.threads.create(
                 messages=[
                     {
                         "role": "user",
-                        "content": user_input,
+                        "content": message_content,
                         "file_ids": file_ids
                     }
                 ]
             )
             thread_id = str(thread_id.id)
             new_chat['thread-id'] = thread_id
-            new_chat['file-ids'] = file_ids
         result = chats_collection.insert_one(new_chat)
         if result.inserted_id:
             return jsonify({'success': True, 'message': 'New chat created.','chat_id': str(result.inserted_id)}), 201
@@ -102,7 +105,8 @@ def update_chats():
                 client.beta.threads.messages.create(
                     thread_id,
                     role="user",
-                    content=user_input,
+                    content=message_content,
+                    file_ids=file_ids
                 )
             except Exception as e:
                 return jsonify({'success': False, 'error': str(e)}), 500

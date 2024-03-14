@@ -261,9 +261,45 @@ def assistant_chat():
                     if not result.modified_count > 0:
                         return jsonify(
                             {'success': False, 'message': 'No chat found with given ID or no update made.'}), 404
-
-
             return jsonify({'success': True}), 200
+
+
+@ai_bp.route('/gpt_assistant/list_message', methods=['GET'])
+def list_message():
+    thread_messages = client.beta.threads.messages.list(
+        "thread_X5SaDLttI2VK6vKY8KWLYnjv",
+        order="asc"
+    )
+    thread_messages = thread_messages.data
+    query = {'_id': ObjectId('65ee1fb3f10a2192197012b0')}
+    chats_collection = db.chats
+    messages_in_db = chats_collection.find_one(query, {'_id': 0, 'messages': 1})
+    len_messages_in_db = len(messages_in_db['messages'])
+    for item in thread_messages[len_messages_in_db:]:
+        this_message = item.content
+        new_message = {}
+        for stuff in this_message:
+            content_type = stuff.type
+            if content_type == 'text':
+                message = stuff.text.value
+                new_message["content"] = message
+                new_message["role"] = item.role
+                new_message["timestamp"] = item.created_at
+            elif content_type == 'image_file':
+                image_id = stuff.image_file.file_id
+                image = client.files.with_raw_response.retrieve_content(image_id).content
+                with open("plot.png", "wb") as f:
+                    f.write(image)
+                with open('plot.png', 'rb') as image_file:
+                    file_id = fs.put(image_file, filename="result.png")
+                new_message["image_id"] = str(file_id)
+        if new_message:
+            update = {'$push': {'messages': new_message}}
+            result = chats_collection.update_one(query, update)
+            if not result.modified_count > 0:
+                return jsonify(
+                    {'success': False, 'message': 'No chat found with given ID or no update made.'}), 404
+
 
 
 def update_database(assistant_id, name, model, instructions, file_ids):
