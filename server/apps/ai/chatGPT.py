@@ -117,7 +117,7 @@ def handle_action():
             if not file_id:
                 return jsonify({'success': False, 'message': 'File ID is required'}), 400
             response = client.files.delete(file_id)
-            return jsonify({'success': True, 'message': 'File deleted successfully', 'response': response}), 200
+            return jsonify({'success': True, 'message': 'File deleted successfully'}), 200
 
         elif action == 'retrieve_file_content':
             if not file_id:

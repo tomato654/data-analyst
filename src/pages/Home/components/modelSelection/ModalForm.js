@@ -87,15 +87,20 @@ const App = ( { open, onCreate, onCancel, selectedSetting } ) => {
         form.setFieldsValue(savedSettings);
     }, [savedSettings, form]);
 
+    const modelValue = form.getFieldValue('model');
+    const isPrivateGPT = Array.isArray(modelValue) && modelValue[0] === "private-gpt";
+
     useEffect(() => {
-        const fetchFileList = async () => {
-            const res = await axios_instance.get('/private-gpt/list_ingested_files');
-            setFileList(res.data.data);
+        if(isPrivateGPT){
+            const fetchFileList = async () => {
+                const res = await axios_instance.get('/private-gpt/list_ingested_files');
+                setFileList(res.data.data);
+            }
+            setFilesloading(true)
+            fetchFileList();
+            setFileUploaded(false);
+            setFilesloading(false);
         }
-        setFilesloading(true)
-        fetchFileList();
-        setFileUploaded(false);
-        setFilesloading(false);
     }, [fileUploaded]);
 
     const uploadProps = {
@@ -110,7 +115,8 @@ const App = ( { open, onCreate, onCancel, selectedSetting } ) => {
                 setFilesloading(false)
                 setFileUploaded(true);
                 message.success(`${info.file.name} file uploaded successfully`);
-            } else if (info.file.status === 'error') {
+            } 
+            else if (info.file.status === 'error') {
                 setFilesloading(false)
                 message.error(`${info.file.name} file upload failed.`);
             }
@@ -144,8 +150,8 @@ const App = ( { open, onCreate, onCancel, selectedSetting } ) => {
         )
     };
 
-    const modelValue = form.getFieldValue('model');
-    const isPrivateGPT = Array.isArray(modelValue) && modelValue[0] === "private-gpt";
+    
+    
 
     const resetAssistant = async () => {
         await(dispatch(fetchChildrenModels({reset: false})))
@@ -176,31 +182,6 @@ const App = ( { open, onCreate, onCancel, selectedSetting } ) => {
                 className='setting-form'
                 layout="vertical"
             >
-                { settingKeys.includes("api-key") ?   <Form.Item label="API-Key">
-                    <Form.Item 
-                        name='api-key'
-                        noStyle
-                    >
-                        <Input.Password 
-                            placeholder="Input Your API-Key" 
-                            addonAfter={
-                                <Form.Item 
-                                    name='expiration'
-                                    noStyle
-                                >
-                                    <Select>
-                                        <Option value="30m">Expires In 30 mintues</Option>
-                                        <Option value="2h">Expires In 2 hours</Option>
-                                        <Option value="12h">Expires In 12 hours</Option>
-                                        <Option value="1d">Expires In 1 day</Option>
-                                        <Option value="7d">Expires In 7 days</Option>
-                                        <Option value="30d">Expires In 30 days</Option>
-                                    </Select>
-                                </Form.Item>
-                            }
-                        />
-                    </Form.Item>
-                </Form.Item> : null}
 
                 { selectedSetting.value === 'openai-assistant' ? <Form.Item
                     label= "Assistant ID"

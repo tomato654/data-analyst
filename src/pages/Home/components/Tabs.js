@@ -77,7 +77,6 @@ const App = () => {
         navigate('/')
         dispatch(setActiveId(''))
         dispatch(setSelectedToUseCompany("local-ai"))
-        // dispatch(setSelectedToUseModel(["private-gpt", "LLM Chat"]))
     };
 
     return (

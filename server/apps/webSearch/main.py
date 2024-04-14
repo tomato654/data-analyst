@@ -26,10 +26,7 @@ def get_quicksearch():
         query = request.args.get("query")
         print(f"level: {level}, query: {query}")
         search_result = search_service.run_chat(query, level)
-        # search_result = '[{"source": "timeanddate.com", "url": "https://www.timeanddate.com/weather/ireland/dublin/ext", "credibility": "Third-Party Source", "text": "\\n \\u2022 Currently, the weather in Dublin is 7\\u00b0C with broken clouds.. \\n \\u2022 The hourly forecast shows a temperature of 3\\u00b0C with sprinkles and morning clouds.. \\n \\u2022 The forecast for the next 7 days in Dublin includes temperatures ranging from 6\\u00b0C to 4\\u00b0C with some precipitation..\\n"}]'
-        # search_result = json.loads(search_result)
     except:
-
         traceback.print_exc()
     return jsonify({"result": search_result}), 200
 

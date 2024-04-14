@@ -102,9 +102,6 @@ const SubmitArea = ( {sendSubmitAreaMsg}, props ) => {
         setIsModalVisible(false);
     };
 
-    // const testClick = async () => {
-    //     await axios_instance.get('/gpt_assistant/list_message')
-    // }
 
     return(
         <div className='submit-area'>

@@ -97,7 +97,7 @@ const Message = () =>{
             companyName = 'Assistant'
         }
         else {
-            companyName = 'Local AI'
+            companyName = 'Local LLM'
         }
         return(
             <div className="message-box-ai">

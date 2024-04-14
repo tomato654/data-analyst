@@ -215,7 +215,6 @@ def assistant_chat():
             thread_id=thread_id,
             assistant_id=assistant_id,
         )
-        # 检查run的状态？ 请帮我修改一下
         run_id = run.id
         run_status = "not_started"
         # 检查run的状态并每隔半秒检查一次
@@ -225,7 +224,7 @@ def assistant_chat():
                 run_id=run_id
             )
             run_status = run.status
-            if run_status == "completed":
+            if run_status != "in_progress":
                 break
             sleep(0.5)
         if run.status == "completed":

@@ -85,9 +85,6 @@ def private_gpt_upload_file():
             api_name="/_upload_file"
         )
 
-        # 删除文件
-        os.remove(file_path)
-
         return jsonify({'result': result})
     else:
         return jsonify({'error': 'File upload failed'}), 500

@@ -115,7 +115,9 @@ const FilesManagement = ({initialValues , onChange, getFiles}) => {
         onChange: (newSelectedRowKeys, newSelectedRows) => {
             setSelectedRowKeys(newSelectedRowKeys)
             triggerChange(newSelectedRowKeys)
-            getFiles(newSelectedRows)
+            if(getFiles){
+                getFiles(newSelectedRows)
+            }
         }
     };
 

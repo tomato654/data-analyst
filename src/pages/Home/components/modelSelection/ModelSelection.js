@@ -44,6 +44,7 @@ const App = () => {
                                 icon={<SettingOutlined />}
                                 onClick={(e) => handleSettingClick(e, element)}
                                 style={{ justifySelf: 'end'}}
+                                disabled={element.label === "Google" || element.label === "Anthropic"}
                             />
                         </div>
                         ) : element.label

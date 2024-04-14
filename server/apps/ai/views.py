@@ -28,6 +28,7 @@ def process_data():
 
         # 先获取该聊天使用的模型
         chat_id = user_message['chat_id']
+        webSearch = user_message.get('webSearch',None)
         using_model = None
         if chat_id:
             try:
@@ -49,6 +50,13 @@ def process_data():
                 'content': new_message['content']
             }).json()
             ai_response = ai_response['response']
+        elif using_model[0] == 'openai' and webSearch:
+            print("web search", webSearch)
+            ai_response = requests.get('http://localhost:8000/search/quick', params={
+                'query': new_message['content']
+            }).json()
+            ai_response = ai_response['result'][0]['text']
+            print("websearch的回答", ai_response)
         elif using_model[0] == 'openai':
             ai_response = requests.post('http://localhost:8000/chat_gpt/chat', json={
                 'using_model': using_model[2],

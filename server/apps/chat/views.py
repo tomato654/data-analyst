@@ -65,7 +65,7 @@ def update_chats():
     if files:
         for file in files:
             file['file_id'] = file.pop('key')
-            file_ids.append(file.file_id)
+            file_ids.append(file['file_id'])
 
     if not chat_id:
         title = message_content if len(message_content) < 20 else message_content[:18] + '...'
@@ -89,7 +89,7 @@ def update_chats():
             new_chat['thread-id'] = thread_id
         result = chats_collection.insert_one(new_chat)
         if result.inserted_id:
-            return jsonify({'success': True, 'message': 'New chat created.','chat_id': str(result.inserted_id)}), 201
+            return jsonify({'success': True, 'message': 'New chat created.', 'chat_id': str(result.inserted_id)}), 201
         else:
             return jsonify({'success': False, 'message': 'Failed to create new chat.'}), 500
 
@@ -146,7 +146,6 @@ def get_all_chat_ids_titles():
 def delete_chat():
     print("用户发送要删除的对话", request.args)
     chat_id = request.args.get('chat_id', None)
-    print("用户发送要删除的对话", request.args)
 
     if chat_id is None:
         return jsonify({'error': 'Missing chat_id'}), 400
@@ -154,8 +153,8 @@ def delete_chat():
     try:
         # 删除具有指定_id的文档
         chat_to_delete = chats_collection.find_one({'_id': ObjectId(chat_id)}, {'_id': 0})
-        thread_id = None
-        if chat_to_delete['thread-id']:
+        thread_id = chat_to_delete.get('thread_id', None)
+        if thread_id:
             thread_id = chat_to_delete['thread-id']
             response = client.beta.threads.delete(thread_id)
 

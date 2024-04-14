@@ -52,10 +52,9 @@ def update_setting():
             update_prompt = requests.post('http://localhost:8000/private-gpt/set_system_prompt', json={
                 'prompt-prefix': new_setting['prompt-prefix'],
             })
-            if update_prompt.ok:
-                return jsonify({"success": True, "message": "Settings updated successfully."}), 200
-            else:
-                return jsonify({"success": False, "message": "Fail to update private GPT prompt."}), 500
+            return jsonify({"success": True, "message": "Settings updated successfully."}), 200
+            # else:
+            #     return jsonify({"success": False, "message": "Fail to update private GPT prompt."}), 500
 
         return jsonify({"success": True, "message": "Settings updated successfully."}), 200
     elif result.upserted_id is not None:
